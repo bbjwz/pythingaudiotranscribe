@@ -23,5 +23,5 @@ def transcribe_audio(url):
         print(f'Could not request results; {e}')
 
 if __name__ == '__main__':
-    AUDIO_URL = 'https://example.com/your-audio-file-url'
+    AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
     transcribe_audio(AUDIO_URL)
