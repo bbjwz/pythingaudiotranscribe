@@ -25,4 +25,6 @@ jobs:
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
           --name transcription-app \
           --image ${{ secrets.AZURE_REGISTRY_URL }}/transcription-app:latest \
-          --dns-name-label transcription-app
+          --dns-name-label transcription-app \
+          --registry-username ${{ secrets.AZURE_REGISTRY_USERNAME }} \
+          --registry-password ${{ secrets.AZURE_REGISTRY_PASSWORD }}
