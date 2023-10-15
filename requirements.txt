@@ -1,5 +1,3 @@
-Django
-gunicorn
 SpeechRecognition
 pydub
 requests

@@ -5,7 +5,7 @@ on:
     branches:
       - main  # Adjust this to your default branch if not 'main'
 
-jobs: 
+jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
 
@@ -25,5 +25,4 @@ jobs:
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
           --name transcription-app \
           --image ${{ secrets.AZURE_REGISTRY_URL }}/transcription-app:latest \
-          --dns-name-label transcription-app \
-          --ports 8000
+          --dns-name-label transcription-app
