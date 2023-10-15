@@ -1,0 +1,29 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your default branch if not 'main'
+
+jobs: 
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ secrets.AZURE_REGISTRY_URL }}/transcription-app:latest .
+        docker login ${{ secrets.AZURE_REGISTRY_URL }} -u ${{ secrets.AZURE_REGISTRY_USERNAME }} -p ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+        docker push ${{ secrets.AZURE_REGISTRY_URL }}/transcription-app:latest
+
+    - name: Deploy to Azure Container Instances
+      run: |
+        az login --service-principal -u ${{ secrets.AZURE_REGISTRY_USERNAME }} -p ${{ secrets.AZURE_REGISTRY_PASSWORD }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+        az container create \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          --name transcription-app \
+          --image ${{ secrets.AZURE_REGISTRY_URL }}/transcription-app:latest \
+          --dns-name-label transcription-app \
+          --ports 8000
