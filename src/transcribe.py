@@ -1,3 +1,4 @@
+import os
 import requests
 from pydub import AudioSegment
 import speech_recognition as sr
@@ -11,8 +12,13 @@ def transcribe_audio(url):
         for chunk in response.iter_content(chunk_size=8192):
             file.write(chunk)
 
+    print(f'File size: {os.path.getsize("audio_stream.wav")} bytes')  # Debug Step 2
+
     audio_file = AudioSegment.from_wav('audio_stream.wav')
+    print(audio_file)  # Debug Step 3
+
     audio_data = sr.AudioData(audio_file.raw_data, audio_file.frame_rate, audio_file.sample_width)
+    print(audio_data)  # Debug Step 4
 
     recognizer = sr.Recognizer()
     try:
