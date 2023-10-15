@@ -4,6 +4,7 @@ import speech_recognition as sr
 
 def transcribe_audio(url):
     response = requests.get(url, stream=True)
+    print(response.status_code)  # Should be 200
     response.raise_for_status()
 
     with open('audio_stream.wav', 'wb') as file:
