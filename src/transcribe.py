@@ -5,20 +5,23 @@ import speech_recognition as sr
 
 def transcribe_audio(url):
     response = requests.get(url, stream=True)
-    print(response.status_code)  # Should be 200
+    print(response.status_code, flush=True)  # Should be 200
     response.raise_for_status()
 
     with open('audio_stream.mp3', 'wb') as file:
         for chunk in response.iter_content(chunk_size=8192):
             file.write(chunk)
 
-    print(f'File size: {os.path.getsize("audio_stream.mp3")} bytes')  # Debug Step 2
+    print(f'File size: {os.path.getsize("audio_stream.mp3")} bytes', flush=True)  # Debug Step 2
 
-    audio_file = AudioSegment.from_mp3('audio_stream.mp3')
-    print(audio_file)  # Debug Step 3
+
+    audio_file = AudioSegment.from_mp3('audio_stream.mp3')  
+    print(audio_file, flush=True)  # Debug Step 3
 
     audio_data = sr.AudioData(audio_file.raw_data, audio_file.frame_rate, audio_file.sample_width)
-    print(audio_data)  # Debug Step 4
+    print(audio_data, flush=True)  # Debug Step 4
+
+
 
     recognizer = sr.Recognizer()
     try:
