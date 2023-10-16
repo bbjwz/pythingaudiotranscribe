@@ -43,5 +43,6 @@ def transcribe_audio(url):
         logging.error("Exception", exc_info=True)  # This will log the full exception traceback
 
 if __name__ == '__main__':
-    AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
+   # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
+    AUDIO_URL = 'https://22343.live.streamtheworld.com/KINK.mp3'
     transcribe_audio(AUDIO_URL)
