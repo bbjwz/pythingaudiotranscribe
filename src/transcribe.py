@@ -8,13 +8,21 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def transcribe_audio(url):
-    response = requests.get(url, stream=True)
+    response = requests.get(url, stream=True, timeout=(5, 10))  # 5 seconds to connect, 10 seconds to read
     logging.debug(response.status_code)  # Should be 200
+    logging.debug(f'Content-Length: {response.headers.get("Content-Length")}')
+    logging.debug(f'Content-Type: {response.headers.get("Content-Type")}')
+    logging.debug(f'Accept-Ranges: {response.headers.get("Accept-Ranges")}')
     response.raise_for_status()
 
-    with open('audio_stream.wav', 'wb') as file:
-        for chunk in response.iter_content(chunk_size=8192):
-            file.write(chunk)
+    try:
+        with open('audio_stream.wav', 'wb') as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                logging.debug(f"First chunk: {chunk[:100]}")  # Log the first 100 bytes of the first chunk
+                file.write(chunk)
+    
+    except Exception as e:
+        logging.error(f"Exception while writing file: {e}")
 
     logging.debug(f'File size: {os.path.getsize("audio_stream.wav")} bytes')  # Debug Step 2
 
