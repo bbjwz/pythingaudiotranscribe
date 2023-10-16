@@ -27,4 +27,5 @@ jobs:
           --image ${{ secrets.AZURE_REGISTRY_URL }}/transcription-app:latest \
           --dns-name-label transcription-app \
           --registry-username ${{ secrets.AZURE_REGISTRY_USERNAME }} \
-          --registry-password ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+          --registry-password ${{ secrets.AZURE_REGISTRY_PASSWORD }} \
+          --environment-variables AZURE_KEY=${{ secrets.AZURE_KEY }}

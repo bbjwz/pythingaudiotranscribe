@@ -1,42 +1,44 @@
+import os
 import requests
 from pydub import AudioSegment
-import speech_recognition as sr
-import logging
-import io
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+import azure.cognitiveservices.speech as speechsdk
 
 def transcribe_audio(url):
-    try:
-        response = requests.get(url, stream=True)
-        logging.debug(response.status_code)  # Should be 200
-        response.raise_for_status()
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
 
-        recognizer = sr.Recognizer()
-        
+    with open('audio_stream.wav', 'wb') as file:
         for chunk in response.iter_content(chunk_size=8192):
-            audio_stream = io.BytesIO(chunk)  # Create a byte stream from the chunk
-            audio_file = AudioSegment.from_file(audio_stream, format="mp3")  # Adjust the format accordingly
-            audio_data = sr.AudioData(audio_file.raw_data, audio_file.frame_rate, audio_file.sample_width)
-            
-            try:
-                text = recognizer.recognize_google(audio_data)
-                logging.debug(f'Transcription: {text}')
-            except sr.UnknownValueError:
-                logging.error("Could not understand audio")
-            except sr.RequestError as e:
-                logging.error(f'Could not request results; {e}')
-
-    except Exception as e:
-        logging.error(f'Exception occurred: {e}', exc_info=True)
+            file.write(chunk)
+    
+    audio_file = AudioSegment.from_wav('audio_stream.wav')
+    
+    azure_key = os.environ.get('AZURE_KEY')
+    if not azure_key:
+        raise ValueError("AZURE_KEY environment variable is not set.")
+    
+    speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="your-region")
+    audio_config = speechsdk.audio.AudioConfig(filename='audio_stream.wav')
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    
+    result = speech_recognizer.recognize_once()
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print(f"Transcription: {result.text}")
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print(f"Speech Recognition canceled: {cancellation_details.reason}")
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print(f"Error details: {cancellation_details.error_details}")
 
 if __name__ == '__main__':
-    AUDIO_URL = 'https://22343.live.streamtheworld.com/KINK.mp3'
+    AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
     transcribe_audio(AUDIO_URL)
 
 
+    # AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
     # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
     # AUDIO_URL = 'https://24443.live.streamtheworld.com/CSPANRADIO.mp3'
-    #https://24443.live.streamtheworld.com/CSPANRADIO.mp3
+    # https://24443.live.streamtheworld.com/CSPANRADIO.mp3
     
