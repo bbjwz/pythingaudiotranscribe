@@ -15,7 +15,9 @@ def transcribe_audio(url):
     with open('audio_stream.wav', 'wb') as file:
         for chunk in response.iter_content(chunk_size=8192):
             file.write(chunk)
-    
+
+    logging.debug(f'File size: {os.path.getsize("audio_stream.wav")} bytes')  # Debug Step 2
+
     audio_file = AudioSegment.from_wav('audio_stream.wav')
     
     azure_key = os.environ.get('AZURE_KEY')
