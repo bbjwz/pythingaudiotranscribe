@@ -3,8 +3,12 @@ import requests
 from pydub import AudioSegment
 import azure.cognitiveservices.speech as speechsdk
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def transcribe_audio(url):
     response = requests.get(url, stream=True)
+    logging.debug(response.status_code)  # Should be 200
     response.raise_for_status()
 
     with open('audio_stream.wav', 'wb') as file:
@@ -14,10 +18,11 @@ def transcribe_audio(url):
     audio_file = AudioSegment.from_wav('audio_stream.wav')
     
     azure_key = os.environ.get('AZURE_KEY')
+    print(f"Key: {azure_key}")
     if not azure_key:
         raise ValueError("AZURE_KEY environment variable is not set.")
     
-    speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="your-region")
+    speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="West Europe")
     audio_config = speechsdk.audio.AudioConfig(filename='audio_stream.wav')
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
     
