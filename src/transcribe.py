@@ -22,7 +22,7 @@ def transcribe_audio(url):
     if not azure_key:
         raise ValueError("AZURE_KEY environment variable is not set.")
     
-    speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="West Europe")
+    speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="westeurope")
     audio_config = speechsdk.audio.AudioConfig(filename='audio_stream.wav')
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
     
