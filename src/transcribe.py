@@ -39,7 +39,7 @@ def transcribe_audio(url):
             print(f"Error details: {cancellation_details.error_details}")
 
 if __name__ == '__main__':
-    AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
+    AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
     transcribe_audio(AUDIO_URL)
 
 
