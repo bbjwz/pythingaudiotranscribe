@@ -7,6 +7,7 @@ def transcribe_audio(url):
     response = requests.get(url, stream=True)
     print(response.status_code, flush=True)  # Should be 200
     response.raise_for_status()
+    print('Status 200 is OK! Anything else not OK!')
 
     with open('audio_stream.mp3', 'wb') as file:
         for chunk in response.iter_content(chunk_size=8192):
@@ -14,13 +15,11 @@ def transcribe_audio(url):
 
     print(f'File size: {os.path.getsize("audio_stream.mp3")} bytes', flush=True)  # Debug Step 2
 
-
     audio_file = AudioSegment.from_mp3('audio_stream.mp3')  
     print(audio_file, flush=True)  # Debug Step 3
 
     audio_data = sr.AudioData(audio_file.raw_data, audio_file.frame_rate, audio_file.sample_width)
     print(audio_data, flush=True)  # Debug Step 4
-
 
 
     recognizer = sr.Recognizer()
