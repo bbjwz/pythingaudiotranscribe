@@ -2,6 +2,7 @@ import os
 import requests
 from pydub import AudioSegment
 import azure.cognitiveservices.speech as speechsdk
+import logging
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
