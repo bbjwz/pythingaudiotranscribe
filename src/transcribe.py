@@ -12,10 +12,12 @@ def transcribe_audio(url):
         response = requests.get(url, stream=True)
         logging.debug(response.status_code)  # Should be 200
         response.raise_for_status()
-
+            
+        logging.debug('Starting to write audio data to file')
         with open('audio_stream.mp3', 'wb') as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
+            for chunk in response.iter_content(chunk_size=2048):
+             file.write(chunk)
+        logging.debug('Finished writing audio data to file')
 
         logging.debug(f'File size: {os.path.getsize("audio_stream.mp3")} bytes')  # Debug Step 2
 
