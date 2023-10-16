@@ -20,14 +20,15 @@ def transcribe_audio(url):
             for chunk in response.iter_content(chunk_size=8192):
                 logging.debug(f"First chunk: {chunk[:100]}")  # Log the first 100 bytes of the first chunk
                 file.write(chunk)
-    
     except Exception as e:
         logging.error(f"Exception while writing file: {e}")
 
     logging.debug(f'File size: {os.path.getsize("audio_stream.wav")} bytes')  # Debug Step 2
-
-    audio_file = AudioSegment.from_wav('audio_stream.wav')
     
+    print("It gets here")
+    audio_file = AudioSegment.from_wav('audio_stream.wav')
+    print("Audiosegment found?")
+
     azure_key = os.environ.get('AZURE_KEY')
     print(f"Key: {azure_key}")
     if not azure_key:
@@ -36,8 +37,13 @@ def transcribe_audio(url):
     speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="westeurope")
     audio_config = speechsdk.audio.AudioConfig(filename='audio_stream.wav')
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
-    
+
+    logging.debug('Initializing Speech Recognizer')
+    logging.debug('Starting transcription')
     result = speech_recognizer.recognize_once()
+    logging.debug('Transcription result received')
+    logging.debug(f'Result: {result}')
+    
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
         print(f"Transcription: {result.text}")
     elif result.reason == speechsdk.ResultReason.NoMatch:
