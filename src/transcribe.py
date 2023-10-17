@@ -47,7 +47,7 @@ def process_stream(url):
             chunk_data = b""
 
 if __name__ == '__main__':
-    AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
+    AUDIO_URL = 'https://24443.live.streamtheworld.com/CSPANRADIO.mp3'
     process_stream(AUDIO_URL)
 
 
