@@ -46,11 +46,11 @@ def process_stream(url):
     response = requests.get(url, stream=True, timeout=(5, 10))
     response.raise_for_status()
 
-    chunk_size = 32768  # 32KB
+    chunk_size = 65536  # 64KB
     chunk_data = b""
     for chunk in response.iter_content(chunk_size=chunk_size):
         chunk_data += chunk
-        if len(chunk_data) > chunk_size * 20:  
+        if len(chunk_data) > chunk_size * 40:  
             transcribe_chunk(chunk_data)
             chunk_data = b""
 
