@@ -43,7 +43,7 @@ def transcribe_chunk(chunk_data):
             print(f"Error details: {cancellation_details.error_details}")
 
 def process_stream(url):
-    response = requests.get(url, stream=True, timeout=(5, 10))
+    response = requests.get(url, stream=True, timeout=(5, 10)) #<- needs to be without timeout?
     response.raise_for_status()
 
     chunk_size = 65536  # 64KB
@@ -63,4 +63,5 @@ if __name__ == '__main__':
     # AUDIO_URL = 'https://24443.live.streamtheworld.com/CSPANRADIO.mp3'
     # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
     # https://24443.live.streamtheworld.com/CSPANRADIO.mp3
+    # current issues: there are gaps in the transcription. 
     
