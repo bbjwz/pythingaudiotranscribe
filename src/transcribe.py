@@ -18,6 +18,13 @@ def transcribe_chunk(chunk_data):
         raise ValueError("AZURE_KEY environment variable is not set.")
     
     speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="westeurope")
+    
+    # Setting the language to Dutch
+    speech_config.speech_recognition_language = 'nl-NL'
+
+    # Enabling audio logging
+    speech_config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EnableAudioLogging, "true")
+
     audio_config = speechsdk.audio.AudioConfig(filename='audio_chunk.wav')
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
@@ -43,7 +50,7 @@ def process_stream(url):
     chunk_data = b""
     for chunk in response.iter_content(chunk_size=chunk_size):
         chunk_data += chunk
-        if len(chunk_data) > chunk_size * 40:  # Process every ~40 chunks (e.g., every 1280KB or 1.28MB)
+        if len(chunk_data) > chunk_size * 20:  
             transcribe_chunk(chunk_data)
             chunk_data = b""
 
