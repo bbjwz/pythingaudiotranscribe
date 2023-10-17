@@ -3,13 +3,14 @@ import requests
 from pydub import AudioSegment
 import azure.cognitiveservices.speech as speechsdk
 import logging
+import io
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def transcribe_chunk(chunk_data):
-    # Convert raw audio data to WAV format
-    audio_chunk = AudioSegment(data=chunk_data, sample_width=2, frame_rate=44100, channels=2)
+    # Convert MP3 data to WAV format
+    audio_chunk = AudioSegment.from_mp3(io.BytesIO(chunk_data))
     audio_chunk.export("audio_chunk.wav", format="wav")
     
     azure_key = os.environ.get('AZURE_KEY')
@@ -38,11 +39,11 @@ def process_stream(url):
     response = requests.get(url, stream=True, timeout=(5, 10))
     response.raise_for_status()
 
-    chunk_size = 8192
+    chunk_size = 32768  # 32KB
     chunk_data = b""
     for chunk in response.iter_content(chunk_size=chunk_size):
         chunk_data += chunk
-        if len(chunk_data) > chunk_size * 10:  # Process every ~10 chunks
+        if len(chunk_data) > chunk_size * 40:  # Process every ~40 chunks (e.g., every 1280KB or 1.28MB)
             transcribe_chunk(chunk_data)
             chunk_data = b""
 
