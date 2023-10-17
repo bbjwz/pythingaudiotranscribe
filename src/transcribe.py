@@ -8,11 +8,10 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def transcribe_chunk(chunk_data):
-    # Save chunk data to file
-    with open('audio_chunk.wav', 'wb') as file:
-        file.write(chunk_data)
-
-    # Transcribe the audio chunk
+    # Convert raw audio data to WAV format
+    audio_chunk = AudioSegment(data=chunk_data, sample_width=2, frame_rate=44100, channels=2)
+    audio_chunk.export("audio_chunk.wav", format="wav")
+    
     azure_key = os.environ.get('AZURE_KEY')
     if not azure_key:
         raise ValueError("AZURE_KEY environment variable is not set.")
@@ -21,7 +20,10 @@ def transcribe_chunk(chunk_data):
     audio_config = speechsdk.audio.AudioConfig(filename='audio_chunk.wav')
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
+    logging.debug('Starting transcription')
     result = speech_recognizer.recognize_once()
+    logging.debug(f'Result: {result}')
+
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
         print(f"Transcription: {result.text}")
     elif result.reason == speechsdk.ResultReason.NoMatch:
@@ -32,25 +34,22 @@ def transcribe_chunk(chunk_data):
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print(f"Error details: {cancellation_details.error_details}")
 
-def process_stream(url, chunk_duration=10):
-    # Calculate chunk size in bytes given the chunk_duration in seconds
-    # Assuming a bitrate of 128kbps for the stream, adjust if needed.
-    chunk_size = int(128 * 1024 * chunk_duration / 8) 
+def process_stream(url):
+    response = requests.get(url, stream=True, timeout=(5, 10))
+    response.raise_for_status()
 
-    while True:
-        response = requests.get(url, stream=True, timeout=(5, 30))
-        chunk_data = b""
-        for data in response.iter_content(chunk_size=chunk_size):
-            chunk_data += data
-            if len(chunk_data) >= chunk_size:
-                break
-        
-        # Transcribe this chunk
-        transcribe_chunk(chunk_data)
+    chunk_size = 8192
+    chunk_data = b""
+    for chunk in response.iter_content(chunk_size=chunk_size):
+        chunk_data += chunk
+        if len(chunk_data) > chunk_size * 10:  # Process every ~10 chunks
+            transcribe_chunk(chunk_data)
+            chunk_data = b""
 
 if __name__ == '__main__':
     AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
     process_stream(AUDIO_URL)
+
 
     # AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
     # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
