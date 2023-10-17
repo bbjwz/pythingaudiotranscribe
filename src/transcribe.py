@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
 
     # AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
-    # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
     # AUDIO_URL = 'https://24443.live.streamtheworld.com/CSPANRADIO.mp3'
+    # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
     # https://24443.live.streamtheworld.com/CSPANRADIO.mp3
     
