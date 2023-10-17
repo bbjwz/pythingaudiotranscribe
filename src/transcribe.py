@@ -7,43 +7,21 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def transcribe_audio(url):
-    response = requests.get(url, stream=True, timeout=(5, 10))  # 5 seconds to connect, 10 seconds to read
-    logging.debug(response.status_code)  # Should be 200
-    logging.debug(f'Content-Length: {response.headers.get("Content-Length")}')
-    logging.debug(f'Content-Type: {response.headers.get("Content-Type")}')
-    logging.debug(f'Accept-Ranges: {response.headers.get("Accept-Ranges")}')
-    response.raise_for_status()
+def transcribe_chunk(chunk_data):
+    # Save chunk data to file
+    with open('audio_chunk.wav', 'wb') as file:
+        file.write(chunk_data)
 
-    try:
-        with open('audio_stream.wav', 'wb') as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                logging.debug(f"First chunk: {chunk[:100]}")  # Log the first 100 bytes of the first chunk
-                file.write(chunk)
-    except Exception as e:
-        logging.error(f"Exception while writing file: {e}")
-
-    logging.debug(f'File size: {os.path.getsize("audio_stream.wav")} bytes')  # Debug Step 2
-    
-    print("It gets here")
-    audio_file = AudioSegment.from_wav('audio_stream.wav')
-    print("Audiosegment found?")
-
+    # Transcribe the audio chunk
     azure_key = os.environ.get('AZURE_KEY')
-    print(f"Key: {azure_key}")
     if not azure_key:
         raise ValueError("AZURE_KEY environment variable is not set.")
     
     speech_config = speechsdk.SpeechConfig(subscription=azure_key, region="westeurope")
-    audio_config = speechsdk.audio.AudioConfig(filename='audio_stream.wav')
+    audio_config = speechsdk.audio.AudioConfig(filename='audio_chunk.wav')
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
-    logging.debug('Initializing Speech Recognizer')
-    logging.debug('Starting transcription')
     result = speech_recognizer.recognize_once()
-    logging.debug('Transcription result received')
-    logging.debug(f'Result: {result}')
-    
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
         print(f"Transcription: {result.text}")
     elif result.reason == speechsdk.ResultReason.NoMatch:
@@ -54,10 +32,25 @@ def transcribe_audio(url):
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print(f"Error details: {cancellation_details.error_details}")
 
+def process_stream(url, chunk_duration=10):
+    # Calculate chunk size in bytes given the chunk_duration in seconds
+    # Assuming a bitrate of 128kbps for the stream, adjust if needed.
+    chunk_size = int(128 * 1024 * chunk_duration / 8) 
+
+    while True:
+        response = requests.get(url, stream=True, timeout=(5, 30))
+        chunk_data = b""
+        for data in response.iter_content(chunk_size=chunk_size):
+            chunk_data += data
+            if len(chunk_data) >= chunk_size:
+                break
+        
+        # Transcribe this chunk
+        transcribe_chunk(chunk_data)
+
 if __name__ == '__main__':
     AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
-    transcribe_audio(AUDIO_URL)
-
+    process_stream(AUDIO_URL)
 
     # AUDIO_URL = 'https://stream06.dotpoint.nl:8004/stream'
     # AUDIO_URL = 'https://stream.bnr.nl/bnr_mp3_128_03'
